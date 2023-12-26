@@ -89,97 +89,150 @@ namespace WinForms231224_drukowanieProstePrzyklady
             }
             else return;//wyjœcie z procedury
         }
-
-
-
-        PrintDocument printDocument = new PrintDocument();
-        PageSetupDialog pageSetupDialog = new PageSetupDialog();
-        PrintDialog printDialog = new PrintDialog();
-
+                      
 
 
 
         private void button4_Click(object sender, EventArgs e)
         {
-            printDocument.DocumentName = "u¿ywam PageSetupDialog";
-            printDocument.PrintPage += new PrintPageEventHandler(pD2_PrintPage);
-            printDocument.DefaultPageSettings.Margins.Top = 50;
-            printDocument.PrinterSettings.DefaultPageSettings.Margins.Top = 100;
-            printDocument.Print();
-            
-            pageSetupDialog.Document = printDocument;
-            printDialog.Document = printDocument;
+            //drukowanie z PageSetupDialog - ustawienia strony
+            //by dzia³aly marginesy musi byæ printDocument.OriginAtMargins = true;
+            //nale¿y do³aczyæ dokument do PegeSetupDialog i PrintDialog
 
-            /*
             PrintDocument printDocument = new PrintDocument();
-            printDocument.DocumentName = "u¿ywam PageSetupDialog";
-            printDocument.PrintPage += new PrintPageEventHandler(pD2_PrintPage);
-            PrintDialog printDialog = new PrintDialog();
-            printDialog.Document = printDocument;
-
-            //ustawianie w³aœciwoœci strony
-            //za pomoc¹ PageSetupDialog
             PageSetupDialog pageSetupDialog = new PageSetupDialog();
-            
-            
-            //do³aczamy nasz drukowany dokument
-            pageSetupDialog.Document = printDocument;
-            
+            PrintDialog printDialog = new PrintDialog();
+
+
+            printDocument.DocumentName = "tu z PageSetupDialog i PrintDialog";
+            printDocument.PrintPage += new PrintPageEventHandler(pD2_PrintPage);
+            //by dzia³aly marginesy w PageSetupDialog
+            //musi byæ printDocument.OriginAtMargins = true;
+            printDocument.OriginAtMargins = true;
+
 
             //ustawiamy wartoœci domyœlne PageStttings i PrinterSetings poprzez new
             pageSetupDialog.PageSettings = new System.Drawing.Printing.PageSettings();
             pageSetupDialog.PrinterSettings = new System.Drawing.Printing.PrinterSettings();
-           */
+            pageSetupDialog.Document= printDocument;
+            printDialog.Document= printDocument;
 
-            /*
             if (pageSetupDialog.ShowDialog() == DialogResult.OK)
             {
-                printDocument.DefaultPageSettings = DialogResult.;
-                printDocument.Print();
-
-                
-              
+                             
                 if (printDialog.ShowDialog() == DialogResult.OK)
                 {
-                    
-                    printDocument.DefaultPageSettings = pageSetupDialog.PageSettings;
-
-                    printDocument.DefaultPageSettings.Margins.Top = 100;
-
-                    printDocument.PrinterSettings=pageSetupDialog.PrinterSettings;
-                    
-
                     printDocument.Print();
                 }
                 else
                 {
                     //wyjœcie z procedury
                     return;
-                }
-            
-            }       
-            
-            */
+                }            
+            }    
+                        
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            //PrintPreviewDialog podglad dokumentu
+
+            PrintDocument printDocument = new PrintDocument();
+            PrintPreviewDialog printPreviewDialog =
+                new PrintPreviewDialog();
+
+            printDocument.DocumentName = "tu z PrintPreviewDialog";
+            printDocument.PrintPage += new PrintPageEventHandler(wieleStron1_PrintPage);
+            printPreviewDialog.Document = printDocument;
+                        
+            printPreviewDialog.ShowDialog();
 
         }
 
 
 
+        int nrStrony = 0;
+
+        private void wieleStron1_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        {
+            //drukowanie wielu stron
+            //kolejne strony bêd¹ do³¹czane do druku,
+            //gdy w³aœciwoœæ e.HasMorePage=True i gdy mamy zewnêtrzn¹ zmienn¹/poza procedur¹/
+            //pocz¹tkowo ustawiamy j¹ na 0 nrStrony
+            //jak mamy jedn¹ lub ostatni¹ to trzeba ustawiæ e.HasMorePage=False; 
+            //i wyzerowaæ nrStrony
+            //inaczej zawiesi siê bo bêdzie czeka³ na kolejn¹ stronê
+
+            //strona 1
+            if (nrStrony == 0)
+            {
+              e.Graphics.DrawString(
+                "strona 1",
+                new Font("Arial", 50),
+                Brushes.Blue,
+                20,
+                10);
+            }
+
+            //strona 2            
+            if (nrStrony == 1)
+            {
+                    e.Graphics.DrawString(
+                    "strona 2",
+                    new Font("Arial", 50),
+                    Brushes.Red,
+                    40,
+                    30);
+            }
+
+            //strona 3
+            if (nrStrony == 2)
+            {
+                e.Graphics.DrawString(
+                "strona 3",
+                new Font("Arial", 50),
+                Brushes.Green,
+                60,
+                50);
+            }
+            
+            //licznik
+            nrStrony++;
+            if (nrStrony <3) { 
+                e.HasMorePages= true;
+            }
+            else
+            {
+                e.HasMorePages= false;
+                nrStrony = 0;
+            }
+        }
 
 
 
-
-        private void wieleStron_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        int nrStrony2 = 0;
+        string s1 = "";
+            private void wieleStron2_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
         {
             //drukowanie du¿ego tekstu na kilka stron
             //formatuje stronê
 
-            //tekst do druku
-            string s1 = "";
-            for (int i = 0; i < 20; i++)
+
+
+            if (nrStrony2 == 0)
             {
-                s1 += "Ala ma psa\noraz kota\ni\npiêæ myszy..\n\n";
+                //tekst do druku
+                for (int i = 0; i < 35; i++)
+                {
+                    s1 += "Ala ma psa\noraz kota\ni\npiêæ myszy..\n\n";
+                }
+
+
+
             }
+
+
+
 
             //jakim fontem ma drukowaæ
             Font font = new Font("Arial", 12);
@@ -224,41 +277,33 @@ namespace WinForms231224_drukowanieProstePrzyklady
             //je¿eli mamy wiecej ni¿ jeden¹ stronê
             //drukuje dalej bo u¿ywamy e.HasMorePages = true;
             //aby zakoñczyæ drukowanie trzeba daæ e.HasMorePages=false;
+            //nrStrony2 jest zmienn¹ poza procedury i jej zmiana powoduje wyskok
+            //e.Graphics startuje ponownie
             if (ileZnakow < s1.Length)
             {
                 s1 = s1.Substring(ileZnakow);
                 e.HasMorePages = true;
+                nrStrony2++;
             }
             else
             {
                 e.HasMorePages = false;
+                nrStrony2 = 0;
             }
 
         }
 
-
-
-
-
-
-
-        private void button5_Click(object sender, EventArgs e)
+        private void button6_Click(object sender, EventArgs e)
         {
-            PrintDocument pD5= new PrintDocument();
-
-            PageSettings pageSettings = new PageSettings();
-            pD5.DefaultPageSettings = pageSettings; 
-            
-            pD5.DocumentName = "to jest pD5";
-            pD5.PrintPage += new PrintPageEventHandler(wieleStron_PrintPage);
-
-            PrintPreviewDialog printPreviewDialog1 =
+            PrintDocument printDocument = new PrintDocument();
+            PrintPreviewDialog printPreviewDialog =
                 new PrintPreviewDialog();
-            printPreviewDialog1.Document= pD5;
 
-            //wyœwietla podgl¹d
-            printPreviewDialog1.ShowDialog();
+            printDocument.DocumentName = "tu z PrintPreviewDialog wiele stron wersja2";
+            printDocument.PrintPage += new PrintPageEventHandler(wieleStron2_PrintPage);
+            printPreviewDialog.Document = printDocument;
 
+            printPreviewDialog.ShowDialog();
         }
     }
 }
